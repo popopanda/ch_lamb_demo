@@ -1,0 +1,79 @@
+version: 2
+jobs:
+  build:
+    machine: true
+    steps:
+      - checkout
+      - run: docker login -u ${DOCKHUB_USERNAME} -p ${DOCKERHUB_PASS}
+
+      # build the application image
+      - run: docker build -t popopanda/ch_lamb_demo:latest .
+
+      # deploy the image
+      - run: docker push popopanda/ch_lamb_demo:latest
+  test1:
+    machine: true
+    steps:
+      # curl container on port 8090
+      - run:
+          command: |
+            docker run -d -p 8090:8090 popopanda/ch_lamb_demo:latest
+            sleep 5
+            curl --retry 10 --retry-delay 5 -v http://localhost:8090
+  test2:
+    docker:
+      - image: golang:alpine
+    steps:
+      - checkout
+      - run:
+          command: |
+            apk add --no-cache curl sudo
+            /usr/bin/curl -o /tmp/terraform.zip https://releases.hashicorp.com/terraform/0.11.2/terraform_0.11.2_linux_amd64.zip?_ga=2.24418618.1632451235.1516518169-2032893471.1513745906
+            sudo /usr/bin/unzip /tmp/terraform.zip -d /usr/local/bin
+            ! /usr/local/go/bin/gofmt -d /root/project/go/src/github.com/ch/helloworld.go 2>&1 | read
+            /usr/local/bin/terraform fmt -check=true /root/project/terraform
+  deploy:
+    docker:
+      - image: circleci/node:7.10.1
+    steps:
+      - checkout
+      - run:
+          command: |
+            /usr/bin/curl -o /tmp/terraform.zip https://releases.hashicorp.com/terraform/0.11.2/terraform_0.11.2_linux_amd64.zip?_ga=2.24418618.1632451235.1516518169-2032893471.1513745906
+            sudo /usr/bin/unzip /tmp/terraform.zip -d /usr/local/bin
+            /bin/sed -i "/^[ ]*family/s/\"ch-.*\"/\"ch-${CIRCLE_SHA1}\"/" /home/circleci/project/terraform/modules/helloch/main.tf
+            cd /home/circleci/project/terraform/providers/aws/us-east-1/ch_lamb_demo
+            /usr/local/bin/terraform init -input=false
+            /usr/local/bin/terraform plan -target=module.helloch.aws_ecs_task_definition.chservice -target=module.helloch.aws_ecs_service.chgo -out output.tfplan -input=false
+            /usr/local/bin/terraform apply -input=false output.tfplan
+workflows:
+  version: 2
+  build_test_deploy:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only:
+                - master
+      - test1:
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - build
+      - test2:
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - build
+      - deploy:
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - test1
+            - test2

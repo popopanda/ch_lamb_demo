@@ -1,0 +1,22 @@
+[
+  {
+    "name": "jenkinsfirst",
+    "image": "jenkins/jenkins:alpine",
+    "cpu": 512,
+    "memory": 1024,
+    "essential": true,
+    "portMappings": [
+      {
+        "containerPort": 8080,
+        "protocol": "tcp",
+        "hostPort": 8080
+      },
+      {
+        "containerPort": 50000,
+        "protocol": "tcp",
+        "hostPort": 50000
+      }
+    ],
+    "networkMode": "awsvpc"
+  }
+]
