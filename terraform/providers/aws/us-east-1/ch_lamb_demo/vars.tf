@@ -1,5 +1,5 @@
 variable "environment" {
-  default = "pandamo_one"
+  default = "ch_lamb_demo"
 }
 
 variable "region" {
