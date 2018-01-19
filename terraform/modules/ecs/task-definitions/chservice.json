@@ -1,0 +1,17 @@
+[
+  {
+    "name": "chfirst",
+    "image": "popopanda/ch_lamb_demo:latest",
+    "cpu": 256,
+    "memory": 256,
+    "essential": true,
+    "portMappings": [
+      {
+        "containerPort": 8080,
+        "protocol": "tcp",
+        "hostPort": 8080
+      }
+    ],
+    "networkMode": "awsvpc"
+  }
+]
