@@ -5,7 +5,7 @@ ENV GOPATH /opt/gotools
 
 WORKDIR /opt
 
-ADD helloworld.go /opt/helloworld.go
+ADD go/src/github.com/ch/helloworld.go /opt/helloworld.go
 
 
 
