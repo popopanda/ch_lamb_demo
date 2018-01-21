@@ -92,24 +92,24 @@ resource "aws_route_table" "private_route" {
 
 # This costs money
 
-# resource "aws_eip" "nat_eip" {
-#   count = "${length(var.zone)}"
-#   vpc   = true
-#
-#   lifecycle {
-#     create_before_destroy = true
-#   }
-# }
+resource "aws_eip" "nat_eip" {
+  count = "${length(var.zone)}"
+  vpc   = true
 
-# resource "aws_nat_gateway" "private_nat_gw" {
-#   count = "${length(var.zone)}"
-#   allocation_id = "${element(aws_eip.nat_eip.*.id, count.index)}"
-#   subnet_id = "${element(aws_subnet.public.*.id, count.index)}"
-#
-#   lifecycle {
-#     create_before_destroy = true
-#   }
-# }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_nat_gateway" "private_nat_gw" {
+  count = "${length(var.zone)}"
+  allocation_id = "${element(aws_eip.nat_eip.*.id, count.index)}"
+  subnet_id = "${element(aws_subnet.public.*.id, count.index)}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
 
 resource "aws_route_table_association" "private_route_assoc" {
   count          = "${length(var.zone)}"
@@ -117,11 +117,31 @@ resource "aws_route_table_association" "private_route_assoc" {
   route_table_id = "${element(aws_route_table.private_route.*.id,count.index)}"
 }
 
-# resource "aws_route" "private_internet" {
-#   count          = "${length(var.zone)}"
-#   route_table_id = "${element(aws_route_table.private_route.*.id, count.index)}"
-#   destination_cidr_block = "0.0.0.0/0"
-#   nat_gateway_id = "${element(aws_nat_gateway.private_nat_gw.*.id, count.index)}"
-#   depends_on = ["aws_route_table.private_route"]
-# }
+resource "aws_route" "private_internet" {
+  count          = "${length(var.zone)}"
+  route_table_id = "${element(aws_route_table.private_route.*.id, count.index)}"
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id = "${element(aws_nat_gateway.private_nat_gw.*.id, count.index)}"
+  depends_on = ["aws_route_table.private_route"]
+}
 
+# Security security group
+resource "aws_security_group" "permit_env" {
+  name        = "permit env"
+  description = "allow resources to vpc to talk"
+  vpc_id      = "${aws_vpc.main.id}"
+
+  ingress {
+    self      = true
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}

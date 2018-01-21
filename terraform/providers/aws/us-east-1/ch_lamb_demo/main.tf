@@ -12,5 +12,6 @@ module "vpc" {
 module "ecs" {
   source            = "../../../../modules/ecs"
   name              = "ch_lamb_demo"
-  public_subnet_ids = "${module.vpc.public_subnet_ids}"
+  private_subnet_ids = "${module.vpc.private_subnet_ids}"
+  env_sg = "${module.vpc.env_sg}"
 }
