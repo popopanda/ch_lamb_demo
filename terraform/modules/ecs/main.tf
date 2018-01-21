@@ -17,7 +17,7 @@ resource "aws_ecs_service" "chgo" {
 
   load_balancer {
     container_name = "chfirst"
-    container_port = 8080
+    container_port = 8090
     target_group_arn = "${aws_lb_target_group.target_group.id}"
   }
 }
@@ -34,7 +34,7 @@ resource "aws_ecs_task_definition" "chservice" {
 
 resource "aws_lb_target_group" "target_group" {
   name = "chdemo-target"
-  port = 8080
+  port = 8090
   protocol = "HTTP"
   vpc_id = "${var.vpc_id}"
   target_type = "ip"
@@ -60,14 +60,14 @@ resource "aws_lb_listener" "front_end" {
 }
 
 resource "aws_security_group" "permit_web" {
-  name        = "permit web 8080"
-  description = "permit 8080 to container"
+  name        = "permit web 8090"
+  description = "permit 8090 to container"
   vpc_id      = "${var.vpc_id}"
 
   ingress {
     cidr_blocks     = ["0.0.0.0/0"]
-    from_port = 8080
-    to_port   = 8080
+    from_port = 8090
+    to_port   = 8090
     protocol  = "tcp"
   }
 
