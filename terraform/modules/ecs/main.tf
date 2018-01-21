@@ -23,7 +23,7 @@ resource "aws_ecs_service" "chgo" {
 }
 
 resource "aws_ecs_task_definition" "chservice" {
-  family                   = "chservice4"
+  family                   = "chservice5"
   container_definitions    = "${file("${path.module}/task-definitions/chservice.json")}"
   network_mode             = "awsvpc"
   execution_role_arn       = "arn:aws:iam::202368747691:role/ecsTaskExecutionRole"
@@ -38,6 +38,7 @@ resource "aws_lb_target_group" "target_group" {
   protocol = "HTTP"
   vpc_id = "${var.vpc_id}"
   target_type = "ip"
+  depends_on = ["aws_lb.alb"]
 }
 
 resource "aws_lb" "alb" {
