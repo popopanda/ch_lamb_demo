@@ -16,9 +16,9 @@ resource "aws_ecs_service" "chgo" {
   }
 
   load_balancer {
-    elb_name = "ch_lamb_demo1"
     container_name = "chfirst"
     container_port = 8080
+    target_group_arn = "${aws_lb_target_group.target_group.id}"
   }
 }
 
@@ -31,6 +31,53 @@ resource "aws_ecs_task_definition" "chservice" {
   memory                   = "512"
   requires_compatibilities = ["FARGATE"]
 }
+
+resource "aws_lb_target_group" "target_group" {
+  name = "chdemo-target"
+  port = 8080
+  protocol = "HTTP"
+  vpc_id = "${var.vpc_id}"
+  target_type = "ip"
+}
+
+resource "aws_lb" "alb" {
+  name            = "ch-lb"
+  internal        = false
+  security_groups = ["${aws_security_group.permit_web.id}", "${var.env_sg}"]
+  subnets         = ["${var.public_subnet_ids}"]
+}
+
+resource "aws_lb_listener" "front_end" {
+  load_balancer_arn = "${aws_lb.alb.arn}"
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    target_group_arn = "${aws_lb_target_group.target_group.arn}"
+    type             = "forward"
+  }
+}
+
+resource "aws_security_group" "permit_web" {
+  name        = "permit web 8080"
+  description = "permit 8080 to container"
+  vpc_id      = "${var.vpc_id}"
+
+  ingress {
+    cidr_blocks     = ["0.0.0.0/0"]
+    from_port = 8080
+    to_port   = 8080
+    protocol  = "tcp"
+  }
+
+  ingress {
+    cidr_blocks     = ["0.0.0.0/0"]
+    from_port = 80
+    to_port   = 80
+    protocol  = "tcp"
+  }
+}
+
 
 resource "aws_iam_role" "ecs_service" {
   name = "ecs_example_role"
