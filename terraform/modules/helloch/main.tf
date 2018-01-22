@@ -23,7 +23,7 @@ resource "aws_ecs_service" "chgo" {
 }
 
 resource "aws_ecs_task_definition" "chservice" {
-  family                   = "chservice5"
+  family                   = "chservice6"
   container_definitions    = "${file("${path.module}/task-definitions/chservice.json")}"
   network_mode             = "awsvpc"
   execution_role_arn       = "arn:aws:iam::202368747691:role/ecsTaskExecutionRole"
@@ -60,14 +60,14 @@ resource "aws_lb_listener" "front_end" {
 }
 
 resource "aws_security_group" "permit_web" {
-  name        = "permit web 8090"
+  name        = "permit web"
   description = "permit 8090 to container"
   vpc_id      = "${var.vpc_id}"
 
   ingress {
     cidr_blocks     = ["0.0.0.0/0"]
-    from_port = 8090
-    to_port   = 8090
+    from_port = 8080
+    to_port   = 8080
     protocol  = "tcp"
   }
 
@@ -79,23 +79,23 @@ resource "aws_security_group" "permit_web" {
   }
 }
 
-
-resource "aws_iam_role" "ecs_service" {
-  name = "ecs_example_role"
-
-  assume_role_policy = <<EOF
-{
-  "Version": "2008-10-17",
-  "Statement": [
-    {
-      "Sid": "",
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "ecs.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-EOF
-}
+#
+# resource "aws_iam_role" "ecs_service" {
+#   name = "ecs_example_role"
+#
+#   assume_role_policy = <<EOF
+# {
+#   "Version": "2008-10-17",
+#   "Statement": [
+#     {
+#       "Sid": "",
+#       "Effect": "Allow",
+#       "Principal": {
+#         "Service": "ecs.amazonaws.com"
+#       },
+#       "Action": "sts:AssumeRole"
+#     }
+#   ]
+# }
+# EOF
+# }

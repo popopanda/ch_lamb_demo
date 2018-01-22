@@ -7,9 +7,9 @@
     "essential": true,
     "portMappings": [
       {
-        "containerPort": 8080,
+        "containerPort": 8090,
         "protocol": "tcp",
-        "hostPort": 8080
+        "hostPort": 8090
       }
     ],
     "networkMode": "awsvpc"
