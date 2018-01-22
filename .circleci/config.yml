@@ -1,0 +1,14 @@
+version: 2
+jobs:
+ build:
+   machine: true
+   steps:
+     - checkout
+     - run: |
+         docker login -u ${DOCKHUB_USERNAME} -p ${DOCKERHUB_PASS}
+
+     # build the application image
+     - run: docker build -t popopanda/ch_lamb_demo:${CIRCLE_BRANCH} .
+
+     # deploy the image
+     - run: docker push popopanda/ch_lamb_demo:${CIRCLE_BRANCH}
