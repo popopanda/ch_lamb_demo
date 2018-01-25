@@ -11,10 +11,20 @@ Provide a demo that satisfies requirements and demonstrate skills
 - Provisions ALB in front of chhello Fargate container
 
 ## CI/CD
-- CI/CD is done through CircleCI
+- CI/CD is ran through CircleCI
+
+Build:
 - Builds image from dockerfile in master branch
 - Push docker image to docker hub
+
+Test1:
 - Runs docker container from image built
+- Curls localhost to check a return of 200
+
+Test2:
+- Checks for terraform format
+
+Deploy:
 - Deploys image into Fargate
 
 ### Modules
